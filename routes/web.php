@@ -22,7 +22,9 @@ Auth::routes();
 
 Route::get('/dashboard', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
-Route::get('products', [ProductController::class, 'index'])->name('products.index');
-Route::get('products/create', [ProductController::class, 'index'])->name('products.create');
-Route::post('products', [ProductController::class, 'index'])->name('products.store');
-Route::get('products/{id}', [ProductController::class, 'index'])->name('products.show');
+Route::middleware(['auth'])->group(function () {
+    Route::get('products', [ProductController::class, 'index'])->name('products.index');
+    // Route::get('products/create', [ProductController::class, 'index'])->name('products.create');
+    Route::post('products', [ProductController::class, 'index'])->name('products.store');
+    Route::get('products/{id}', [ProductController::class, 'index'])->name('products.show');
+});
