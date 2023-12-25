@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\AddProductRequest;
+use App\Http\Requests\UpdateProductRequest;
 use App\Models\Product;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ProductController extends Controller
 {
@@ -19,14 +21,6 @@ class ProductController extends Controller
 
         return view('products.index', compact('products'));
     }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    // public function create()
-    // {
-    //     //
-    // }
 
     /**
      * Store a newly created resource in storage.
@@ -60,16 +54,6 @@ class ProductController extends Controller
         return redirect()->route('products.index');
     }
 
-    // public function store(Request $request)
-    // {
-    //     dd($request);
-
-    //     $payload = $request->validated();
-
-    //     dd($payload);
-    // }
-
-
     /**
      * Display the specified resource.
      */
@@ -83,15 +67,50 @@ class ProductController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $product = Product::where('id', $id)->firstOrFail();
+
+        return view('products.edit', compact('product'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateProductRequest $request, string $id)
     {
-        //
+        try {
+
+            DB::beginTransaction();
+
+            $payload = $request->validated();
+
+            $product = Product::where('id', $id)->first();
+
+            if (!$product) {
+                return redirect()->back()->with('error', 'Product Not Found');
+            }
+
+            if ($request->hasFile('image')) {
+                $payload['image'] = $request->file('image');
+                $path = $request->file('image')->store('products', 'public');
+            }
+
+            $product->update([
+                'name' => $payload['name'],
+                'price' => $payload['price'],
+                'description' => $payload['description'],
+                'image_path' => $path ?? $product->image_path,
+            ]);
+
+            DB::commit();
+
+            return redirect()->route('products.index');
+        } catch (\Throwable $th) {
+            DB::rollback();
+            Log::info("Error Updating Product");
+            Log::error($th);
+            return redirect()->back()->with('error', 'Something Went Wrong');
+        }
+        return redirect()->route('products.index');
     }
 
     /**

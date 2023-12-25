@@ -70,21 +70,34 @@
 
                     <table class="table-bordered">
                         <tr>
+                            <td>No</td>
                             <td>Name</td>
                             <td>Price</td>
                             <td>Description</td>
                             <td>Image</td>
                             <td>Status</td>
+                            <td>Action</td>
                         </tr>
                         @forelse ($products as $product)
                         <tr>
+                            <td>{{ $loop->iteration }}</td>
                             <td>{{ $product->name }}</td>
                             <td>{{ $product->price }}</td>
                             <td>{{ $product->description }}</td>
-                            <td>
+                            <td class="text-center">
                                 <img src="{{ asset( 'storage/' . $product->image_path) }}" alt="{{($product->name) }}" width="20%">
                             </td>
                             <td>{{ $product->published_at ? 'PUBLISHED' : 'DRAFT' }}</td>
+                            <td>
+                                <a href="{{ route('products.edit', $product->id) }}" class="btn btn-info">Edit</a>
+
+                                <form action="{{ route('products.destroy', $product->id) }}" method="POST">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-danger mt-2">Delete</button>
+
+                                </form>
+                            </td>
                         </tr>
                         @empty
                         <tr>
