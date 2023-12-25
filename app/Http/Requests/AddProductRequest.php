@@ -25,7 +25,8 @@ class AddProductRequest extends FormRequest
             'name' => 'required|string|max:255',
             'price' => 'required|integer|min:0',
             'description' => 'required|string',
-            'image' => 'required|mimetypes:jpg,png|max:2048', //2 MB
+            // 'image' => 'required|mimetypes:jpg,png|max:2048', //2 MB
+            'image' => 'nullable|image', //2 MB
         ];
     }
 

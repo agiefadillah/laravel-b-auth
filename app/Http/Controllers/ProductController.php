@@ -31,8 +31,41 @@ class ProductController extends Controller
      */
     public function store(AddProductRequest $request)
     {
-        $payload = $request->validated();
+        try {
+            $payload = $request->validated();
+
+            DB::beginTransaction();
+
+            if ($request->hasFile('image')) {
+                $payload['image'] = $request->file('image');
+                $path = $request->file('image')->store('product', 'public');
+            }
+
+            $product = Product::create([
+                'name' => $payload['name'],
+                'price' => $payload['price'],
+                'description' => $payload['description'],
+                'image_path' => $path,
+            ]);
+
+            DB::commit();
+        } catch (\Throwable $th) {
+            DB::rollback();
+            throw $th;
+            return redirect()->back()->with('error', 'Something Went Wrong');
+        }
+        return redirect()->route('products.index');
     }
+
+    // public function store(Request $request)
+    // {
+    //     dd($request);
+
+    //     $payload = $request->validated();
+
+    //     dd($payload);
+    // }
+
 
     /**
      * Display the specified resource.

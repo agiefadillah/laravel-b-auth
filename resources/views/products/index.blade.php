@@ -12,6 +12,7 @@
 
                     <form action="{{ route('products.create') }}" method="POST" enctype="multipart/form-data">
                         @csrf
+                        @method('POST')
                         <div class="form-group mb-3">
                           <label for="name">Products Name</label>
                           <input type="text" class="form-control" id="name" name="name" placeholder="Products Name">
@@ -68,20 +69,20 @@
                 <div class="card-body">
 
                     <table class="table-bordered">
-                        <th>
+                        <tr>
                             <td>Name</td>
                             <td>Price</td>
                             <td>Description</td>
                             <td>Image</td>
                             <td>Status</td>
-                        </th>
+                        </tr>
                         @forelse ($products as $product)
                         <tr>
                             <td>{{ $product->name }}</td>
                             <td>{{ $product->price }}</td>
                             <td>{{ $product->description }}</td>
                             <td>{{ $product->image }}</td>
-                            <td>{{ $product->status }}</td>
+                            <td>{{ $product->published_at ? 'PUBLISHED' : 'DRAFT' }}</td>
                         </tr>
                         @empty
                         <tr>
