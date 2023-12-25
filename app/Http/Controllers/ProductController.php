@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\AddProductRequest;
 use App\Models\Product;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ProductController extends Controller
 {
@@ -38,7 +40,7 @@ class ProductController extends Controller
 
             if ($request->hasFile('image')) {
                 $payload['image'] = $request->file('image');
-                $path = $request->file('image')->store('product', 'public');
+                $path = $request->file('image')->store('products', 'public');
             }
 
             $product = Product::create([
@@ -46,11 +48,12 @@ class ProductController extends Controller
                 'price' => $payload['price'],
                 'description' => $payload['description'],
                 'image_path' => $path,
+                'published_at' => Carbon::now(),
             ]);
 
             DB::commit();
         } catch (\Throwable $th) {
-            DB::rollback();
+            DB::rollBack();
             throw $th;
             return redirect()->back()->with('error', 'Something Went Wrong');
         }

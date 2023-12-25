@@ -10,7 +10,7 @@
 
                 <div class="card-body">
 
-                    <form action="{{ route('products.create') }}" method="POST" enctype="multipart/form-data">
+                    <form action="{{ route('products.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         @method('POST')
                         <div class="form-group mb-3">
@@ -81,7 +81,9 @@
                             <td>{{ $product->name }}</td>
                             <td>{{ $product->price }}</td>
                             <td>{{ $product->description }}</td>
-                            <td>{{ $product->image }}</td>
+                            <td>
+                                <img src="{{ asset( 'storage/' . $product->image_path) }}" alt="{{($product->name) }}" width="20%">
+                            </td>
                             <td>{{ $product->published_at ? 'PUBLISHED' : 'DRAFT' }}</td>
                         </tr>
                         @empty
