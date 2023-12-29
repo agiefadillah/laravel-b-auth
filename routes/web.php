@@ -1,7 +1,10 @@
 <?php
 
-use App\Http\Controllers\ProductController;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
+use Symfony\Component\DomCrawler\Crawler;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProfileController;
 
 /*
 |--------------------------------------------------------------------------
@@ -22,12 +25,10 @@ Auth::routes();
 
 Route::get('/dashboard', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
-// Route::middleware(['auth'])->group(function () {
 Route::middleware(['isAdmin', 'auth'])->group(function () {
-    Route::get('products', [ProductController::class, 'index'])->name('products.index');
-    // Route::get('products/create', [ProductController::class, 'index'])->name('products.create');
-    Route::post('products', [ProductController::class, 'store'])->name('products.store');
-    Route::get('products/{id}/edit', [ProductController::class, 'edit'])->name('products.edit');
-    Route::post('products/{id}', [ProductController::class, 'update'])->name('products.update');
-    Route::delete('products/{id}', [ProductController::class, 'destroy'])->name('products.destroy');
+    Route::get('/products', [ProductController::class, 'index'])->name('products.index');
+    Route::post('/products', [ProductController::class, 'store'])->name('products.store');
+    Route::get('/products/{id}/edit', [ProductController::class, 'edit'])->name('products.edit');
+    Route::post('/products/{id}', [ProductController::class, 'update'])->name('products.update');
+    Route::delete('/products/{id}', [ProductController::class, 'destroy'])->name('products.destroy');
 });

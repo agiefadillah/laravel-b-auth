@@ -1,5 +1,28 @@
 @extends('layouts.app')
 
+@push('custom_script')
+<script>
+    let btnAddNewImage = document.getElementById('btnAddNewImage');
+    btnAddNewImage.addEventListener('click', function() {
+        let btnAddImageContainer = document.getElementById('btnAddImageContainer');
+        let imageInputContainer = document.createElement('div');
+        imageInputContainer.classList.add('form-group');
+        imageInputContainer.classList.add('mb-3');
+
+        let imageCounter = 2;
+
+        let imageInputEl = document.createElement ('input');
+        imageInputEl.setAttribute('type', 'file');
+        imageInputEl.setAttribute('name', 'images' + '-' + imageCounter);
+        imageInputEl.setAttribute('data-id', imageCounter);
+
+        imageInputContainer.appendChild(imageInputEl);
+
+        btnAddImageContainer.insertAdjacentElement('afterend', imageInputContainer);
+    });
+</script>
+@endpush
+
 @section('content')
 <div class="container">
     <div class="row justify-content-center">
@@ -48,10 +71,15 @@
                         <img src="{{ asset('storage/' . $product->image_path )}}" alt="{{ $product->name }}" width="20%">
                       </div>
 
-                          <div class="form-group mb-3">
+                          <div class="form-group mb-3" id="btnAddImageContainer">
                             <label for="image">Products Image</label>
-                            <input type="file" class="form-control" id="image" name="image" placeholder="Products Image" >
+                            <button type="button" id="btnAddNewImage" class="btn btn-info btn-sm"> + </button>
                           </div>
+
+                          <div class="form-group mb-3">
+                            <input type="file" class="form-control" id="image" name="images[]" multiple>
+                          </div>
+
                           @error('image')
                           <span class="invalid-feedback" role="alert">
                               <strong>{{ $message }}</strong>

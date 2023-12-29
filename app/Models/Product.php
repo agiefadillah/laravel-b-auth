@@ -17,4 +17,8 @@ class Product extends Model
         'image_path',
         'published_at',
     );
+    public function images()
+    {
+        return $this->hasMany(ProductImage::class);
+    }
 }

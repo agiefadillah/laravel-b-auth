@@ -7,6 +7,8 @@ use Illuminate\Foundation\Http\FormRequest;
 class AddProductRequest extends FormRequest
 
 {
+    protected $stopOnFirstFailure = true;
+
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -23,11 +25,13 @@ class AddProductRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'nullable|string|max:255',
-            'price' => 'nullable|integer|min:0',
-            'description' => 'nullable|string',
-            // 'image' => 'required|mimetypes:jpg,png|max:2048', //2 MB
-            'image' => 'nullable|image', //2 MB
+            'name' => 'required|string|max:255',
+            'price' => 'required',
+            'description' => 'required|string',
+            // 'image' => 'required|mimetypes:jpg,png|max:10240', //2 MB
+            // 'image' => 'required|image', //2 MB
+            'images' => 'required,array',
+            'images.*' => 'required|mimes:jpg,png|max:10240', //2 MB
         ];
     }
 
@@ -35,10 +39,18 @@ class AddProductRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.required' => 'A name is required',
-            'price.required' => 'A price is required',
-            'description.required' => 'A description is required',
-            'image.required' => 'An image is required',
+            'name.required' => 'The name field is required',
+            'name.string' => 'The name field must be a string',
+            'name.max' => 'The name field must be less than 255 characters',
+
+            'price.required' => 'The price field is required',
+
+            'description.required' => 'The description field is required',
+            'description.string' => 'The description field must be a string',
+
+            'image.required' => 'The image field is required',
+            'image.mimetypes' => 'The image field must be a jpg or png',
+            'image.max' => 'The image field must be less than 10MB',
         ];
     }
 }

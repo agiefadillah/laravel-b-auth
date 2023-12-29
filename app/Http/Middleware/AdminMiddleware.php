@@ -15,11 +15,10 @@ class AdminMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // dd(auth()->user());
         if (auth()->user()->role !== 'admin') {
-            return redirect()->route('login');
-            abort(403, 'You are not eligable to access this page.');
+            abort(403, 'You are not eligible to access this page.');
         }
+
         return $next($request);
     }
 }

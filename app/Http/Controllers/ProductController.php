@@ -2,25 +2,36 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\AddProductRequest;
-use App\Http\Requests\UpdateProductRequest;
-use App\Models\Product;
 use Carbon\Carbon;
+use App\Models\Product;
+use App\Models\ProductImage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Http\Requests\AddProductRequest;
+use App\Http\Requests\UpdateProductRequest;
+use App\Services\ProductService;
 
 class ProductController extends Controller
 {
+    public function __construct(
+        protected ProductService $productService,
+    ) {
+    }
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $products = Product::all();
+        $products = Product::with(
+            'images:product_id,path',
+            'ratings:product_id,user_id,rating'
+        )->select()->get();
 
         return view('products.index', compact('products'));
     }
+
 
     /**
      * Store a newly created resource in storage.
@@ -28,29 +39,17 @@ class ProductController extends Controller
     public function store(AddProductRequest $request)
     {
         try {
-            $payload = $request->validated();
+            $payload = $request->all();
 
             DB::beginTransaction();
-
-            if ($request->hasFile('image')) {
-                $payload['image'] = $request->file('image');
-                $path = $request->file('image')->store('products', 'public');
-            }
-
-            $product = Product::create([
-                'name' => $payload['name'],
-                'price' => $payload['price'],
-                'description' => $payload['description'],
-                'image_path' => $path,
-                'published_at' => Carbon::now(),
-            ]);
+            $product = $this->productService->addProduct($payload);
 
             DB::commit();
         } catch (\Throwable $th) {
             DB::rollBack();
-            throw $th;
-            return redirect()->back()->with('error', 'Something Went Wrong');
+            return redirect()->back()->withErrors($th->getMessage());
         }
+
         return redirect()->route('products.index');
     }
 
@@ -67,7 +66,7 @@ class ProductController extends Controller
      */
     public function edit(string $id)
     {
-        $product = Product::where('id', $id)->firstOrFail();
+        $product = Product::with('images')->where('id', $id)->firstOrFail();
 
         return view('products.edit', compact('product'));
     }
@@ -78,15 +77,12 @@ class ProductController extends Controller
     public function update(UpdateProductRequest $request, string $id)
     {
         try {
-
             DB::beginTransaction();
-
             $payload = $request->validated();
-
             $product = Product::where('id', $id)->first();
 
             if (!$product) {
-                return redirect()->back()->with('error', 'Product Not Found');
+                return redirect()->back()->with('error', 'Product not found');
             }
 
             if ($request->hasFile('image')) {
@@ -106,11 +102,10 @@ class ProductController extends Controller
             return redirect()->route('products.index');
         } catch (\Throwable $th) {
             DB::rollback();
-            Log::info("Error Updating Product");
+            Log::info("Error updating product");
             Log::error($th);
-            return redirect()->back()->with('error', 'Something Went Wrong');
+            return redirect()->back()->with('error', 'Something went wrong');
         }
-        return redirect()->route('products.index');
     }
 
     /**
@@ -121,7 +116,7 @@ class ProductController extends Controller
         $product = Product::where('id', $id)->first();
 
         if (!$product) {
-            return redirect()->back()->with('error', 'Product Not Found');
+            return redirect()->back()->with('error', 'Product not found');
         }
 
         $product->delete();
